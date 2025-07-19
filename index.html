@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liam Sreya</title>
+    <style>
+      html {
+        font-family: monospace;
+        font-size: 100%;
+      }
+      body {
+        max-width: 700px;    /* ideal for readability */
+        margin: 0 auto;      /* center horizontally */
+        padding: 1rem;       /* space on smaller screens */
+      }
+      body, h1, h2, h3, h4, h5, h6, p, a, li, span, div, code, pre {
+        font-family: inherit;
+        font-size: inherit;
+      }
+      h1 {
+        text-align: center;
+      }
+      m {
+        color: #888;
+        opacity: 0.5;
+        font-style: normal;
+      }
+      details {
+        border-bottom: 2px;
+      }
+      details summary::-webkit-details-marker {
+        display: none;
+      }
+      details summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.5em 0;
+        margin-bottom: 0;
+      }
+
+      /* Style the h1 inside summary */
+      details summary h1 {
+        display: flex;
+        gap: 0.5em;
+        font-size: 1.5em;
+        margin: 0;
+      }
+      
+      details nav ul {
+        margin-top: 0;
+      }
+
+      /* Rotate arrow when open */
+      details[open] summary .arrow {
+        transform: rotate(90deg);
+      }
+      hr.doubled {
+        border-top: 2px double;
+        margin-top: 0;
+      }
+      hr.dashed {
+        border-top: 1px dashed #aaa;
+      }
+      ul {
+        list-style: none;         /* Remove default bullets */
+        margin-left: 0;           /* Remove default indentation */
+        padding-left: 0;          /* Remove default indentation */
+      }
+
+      ul li {
+        position: relative;
+        padding-left: 1.2em;      /* Space for the custom bullet */
+      }
+
+      ul li::before {
+        content: "*";
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-weight: bold;
+        color: inherit;           /* Match text color */
+      }
+      article header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1em;
+        margin-top: 1em;
+      }
+      article header h2 {
+        margin: 0;
+        flex: 1;
+      }
+      article header time {
+        white-space: nowrap;
+        font-size: 0.9em;
+        color: #888;
+        opacity: 0.8;
+      }
+      article p {
+        display: flex;
+        gap: 1em;
+        align-items: flex-start;
+        flex: 1;
+        margin-top: 0.5em;
+      }
+      article svg {
+        flex: 0 0 15%;
+        aspect-ratio: 1 / 1; /* Maintains square shape */
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      } 
+    </style>
+    <body>
+      <header>
+        <details>
+          <summary><h1>liam𝕊reya<span class="arrow">></span></h1></summary>
+          <nav aria-label="Main Navigation">
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="/articles">Articles</a></li>
+              <li><a href="/about">About</a></li>
+            </ul>
+          </nav>
+        </details>
+        <hr class="doubled">
+      </header>
+      <main>
+
+        <section aria-label="Articles">
+
+          <article>
+            <header>
+              <h2><a href="/articles/stoicism.html">The Power of Stoicism</a></h2>
+              <time datetime="2025-07-18">July 18, 2025</time>
+            </header>
+            <p>Stoicism teaches us how to remain calm in chaos. Discover its principles and how they apply today...</p>
+          </article>
+
+          <hr class="dashed">
+
+          <article>
+            <header>
+              <h2><a href="/articles/stoicism.html">The Power of Stoicism</a></h2>
+              <time datetime="2025-07-18">July 18, 2025</time>
+            </header>
+            <p>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+              <rect width="100" height="100" fill="none" stroke="#ccc" stroke-width="2" />
+            </svg>
+            Stoicism teaches us how to remain calm in chaos. Discover its principles and how they apply today...
+            </p>
+          </article>
+
+          <hr class="dashed">
+
+          <article>
+            <header class="article-header">
+              <div class="title-row">
+                <h2><a href="/articles/stoicism.html">The Power of Stoicism</a></h2>
+                <time datetime="2025-07-18">July 18, 2025</time>
+              </div>
+            </header>
+            <p>Stoicism teaches us how to remain calm in chaos. Discover its principles and how they apply today...</p>
+          </article>
+
+          <hr>
+
+        </section>
+
+      </main>
+      <footer style="color: #888;">
+        <p>&copy; 2025 Liam Sreya</p>
+      </footer>
+    </body>
+  </head>
+</html>
