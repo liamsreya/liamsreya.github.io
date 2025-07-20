@@ -16,3 +16,6 @@ We talk a bit about.
 ## This is the second one
 
 And some text.
+
+> [!TIP]
+> This js another one.
