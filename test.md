@@ -8,7 +8,7 @@ author: John Doe
 
 ## This is a separate section
 
-We talk a bit ~about~.
+We talk a bit ~~about~~.
 
 > [!NOTE]
 > Curious how this works
