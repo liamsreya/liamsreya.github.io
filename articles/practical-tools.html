@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>practical tools</title>
+    <style>
+      html {
+        font-family: monospace;
+        font-size: 100%;
+      }
+      body {
+        max-width: 700px;    /* ideal for readability */
+        margin: 0 auto;      /* center horizontally */
+        padding: 1rem;       /* space on smaller screens */
+      }
+      body, h1, h2, h3, h4, h5, h6, p, a, li, span, div, code, pre {
+        font-family: inherit;
+        font-size: inherit;
+      }
+      h1 {
+        text-align: center;
+        font-weight: normal;
+      }
+      m {
+        color: #888;
+        opacity: 0.5;
+        font-style: normal;
+      }
+      details {
+        border-bottom: 2px;
+      }
+      details summary::-webkit-details-marker {
+        display: none;
+      }
+      details summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.5em 0;
+        margin-bottom: 0;
+      }
+
+      details summary h1 {
+        font-family: monospace;
+        gap: 0.5em;
+        display: flex;
+        font-size: 1.5em;
+        margin: 0;
+      }
+      details nav ul {
+        margin-top: 0;
+      }
+      details[open] summary .arrow {
+        transform: rotate(90deg);
+      }
+      hr.doubled {
+        border-top: 2px double;
+        margin-top: 0;
+      }
+      hr.dashed {
+        border-top: 1px dashed #aaa;
+      }
+      ul {
+        list-style: none;         /* Remove default bullets */
+        margin-left: 0;           /* Remove default indentation */
+        padding-left: 0;          /* Remove default indentation */
+      }
+
+      ul li {
+        position: relative;
+        padding-left: 1.2em;      /* Space for the custom bullet */
+      }
+
+      ul li::before {
+        content: "*";
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-weight: bold;
+        color: inherit;           /* Match text color */
+      }
+    </style>
+    <body>
+      <header>
+        <details>
+          <summary><h1>practical tools<span class="arrow">></span></h1></summary>
+          <nav aria-label="Main Navigation">
+            <ul>
+              <li><a href="../index.html">home</a></li>
+              <li><a href="/about">About</a></li>
+            </ul>
+          </nav>
+        </details>
+        <hr class="doubled">
+      </header>
+      <main>
+        <article>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+              <path d="M 20 10 H 75 A 5 5 0 0 1 80 15 V 85 A 5 5 0 0 1 75 90 H 20 V 10 Z" fill="black" />
+              <path d="M44 6 H56 V10 H52 L50 12 L48 10 H44 Z" fill="black"/>
+              <text x="50" y="35" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif">FIELD</text>
+              <text x="50" y="45" text-anchor="middle" font-size="8" fill="white" font-family="sans-serif">NOTES</text>
+        <article>
+      </main>
+      <footer style="color: #888;">
+        <p>&copy; 2025 Liam Sreya</p>
+      </footer>
+    </body>
+  </head>
+</html>
