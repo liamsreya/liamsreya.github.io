@@ -8,7 +8,7 @@ author: John Doe
 
 ## This is a separate section
 
-We talk a bit about.
+We talk a bit ~about~.
 
 > [!NOTE]
 > Curious how this works
@@ -19,3 +19,8 @@ And some text.
 
 > [!TIP]
 > This js another one.
+
+| First Header  | Second Header |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
