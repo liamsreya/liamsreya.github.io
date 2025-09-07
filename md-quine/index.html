@@ -39,9 +39,9 @@
     <p>This is your PWA shell. Paste your Markdown/ABC/LilyPond content below. Add your renderer/worker as needed.</p>
 
     <div class="row">
-      <button id="save">Save to local cache</button>
-      <button id="load">Load from local cache</button>
-      <button id="clear">Clear cache</button>
+      <button id="save">Save</button>
+      <button id="load">Load</button>
+      <button id="clear">Clear</button>
     </div>
 
     <textarea id="editor" placeholder="Type here…"></textarea>
@@ -54,7 +54,6 @@
 
 <script>
   // --- GitHub Pages base detection (works in root or /<repo>/) ---
-  // Useful if you later fetch("./something") from JS; this computes a prefix you can prepend.
   const pathParts = location.pathname.split("/").filter(Boolean);
   const isProjectPage = location.hostname.endsWith(".github.io") && pathParts.length >= 1;
   const BASE = isProjectPage ? ("/" + pathParts[0] + "/") : "/";
@@ -67,47 +66,112 @@
     });
   }
 
-  // --- Minimal "quine" storage taste: keep editor content in Cache Storage as a Response ---
-  const CACHE_NAME = "quine-store-v1";
-  const VIRTUAL_DOC = new Request("quine://content", { method: "GET" });
+  /* ============================================================
+     ROBUST STATE STORAGE (IndexedDB with localStorage fallback)
+     ============================================================ */
+  const APP_KEY   = (location.pathname.replace(/\/+$/,'') || '/');  // namespace by path
+  const STATE_KEY = `${APP_KEY}::editorState`;
 
-  async function saveContent() {
-    const cache = await caches.open(CACHE_NAME);
-    const text = document.getElementById("editor").value;
-    await cache.put(VIRTUAL_DOC, new Response(text, { headers: { "Content-Type": "text/plain" }}));
-    log("Saved to cache");
+  const DB_NAME = 'quine-db';
+  const STORE   = 'states';
+
+  function idbOpen(){
+    return new Promise((res, rej) => {
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = () => {
+        const db = r.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      r.onsuccess = () => res(r.result);
+      r.onerror   = () => rej(r.error);
+    });
+  }
+  function idbGet(k){ return idbOpen().then(db => new Promise((res, rej)=>{
+    const t = db.transaction(STORE, 'readonly');
+    const s = t.objectStore(STORE).get(k);
+    s.onsuccess = () => res(s.result ?? null);
+    s.onerror   = () => rej(s.error);
+  }));}
+  function idbSet(k,v){ return idbOpen().then(db => new Promise((res, rej)=>{
+    const t = db.transaction(STORE, 'readwrite');
+    const s = t.objectStore(STORE).put(v, k);
+    s.onsuccess = () => res(true);
+    s.onerror   = () => rej(s.error);
+  }));}
+  function idbDel(k){ return idbOpen().then(db => new Promise((res, rej)=>{
+    const t = db.transaction(STORE, 'readwrite');
+    const s = t.objectStore(STORE).delete(k);
+    s.onsuccess = () => res(true);
+    s.onerror   = () => rej(s.error);
+  }));}
+
+  function lsGet(k){ try { return Promise.resolve(localStorage.getItem(k)); } catch { return Promise.resolve(null); } }
+  function lsSet(k,v){ try { localStorage.setItem(k,v); return Promise.resolve(true); } catch { return Promise.resolve(false); } }
+  function lsDel(k){ try { localStorage.removeItem(k); return Promise.resolve(true); } catch { return Promise.resolve(false); } }
+
+  async function loadState(){
+    if ('indexedDB' in window) { try { const v = await idbGet(STATE_KEY); if (v != null) return v; } catch {} }
+    return await lsGet(STATE_KEY);
+  }
+  async function saveState(text){
+    if ('indexedDB' in window) { try { await idbSet(STATE_KEY, text); return true; } catch {} }
+    return await lsSet(STATE_KEY, text);
+  }
+  async function clearState(){
+    if ('indexedDB' in window) { try { await idbDel(STATE_KEY); } catch {} }
+    await lsDel(STATE_KEY);
   }
 
-  async function loadContent() {
-    const cache = await caches.open(CACHE_NAME);
-    const res = await cache.match(VIRTUAL_DOC);
-    if (res) {
-      document.getElementById("editor").value = await res.text();
-      log("Loaded from cache");
-    } else {
-      log("Nothing saved yet.");
-    }
-  }
+  // ---------- One-time migration from old Cache API storage ----------
+  (async () => {
+    try {
+      if (!('caches' in window)) return;
+      const oldCache = await caches.open('quine-store-v1');
+      // If you used a different key, adjust below:
+      const oldReq = new Request('quine://content', { method: 'GET' });
+      const resp = await oldCache.match(oldReq);
+      if (resp) {
+        const text = await resp.text();
+        await saveState(text);
+        await oldCache.delete(oldReq);
+        log('Migrated previous cached state → IndexedDB');
+      }
+    } catch {}
+  })();
+  // -------------------------------------------------------------------
 
-  async function clearContent() {
-    await caches.delete(CACHE_NAME);
-    log("Cleared cache");
-  }
+  // --- Wire up UI ---
+  const editor  = document.getElementById('editor');
+  const logEl   = document.getElementById('log');
+  const saveBtn = document.getElementById('save');
+  const loadBtn = document.getElementById('load');
+  const clearBtn= document.getElementById('clear');
 
   function log(msg) {
-    const el = document.getElementById("log");
-    el.textContent = (new Date()).toLocaleTimeString() + " -- " + msg + "\n" + el.textContent;
+    logEl.textContent = new Date().toLocaleTimeString() + " -- " + msg + "\n" + logEl.textContent;
   }
 
-  document.getElementById("save").addEventListener("click", saveContent);
-  document.getElementById("load").addEventListener("click", loadContent);
-  document.getElementById("clear").addEventListener("click", clearContent);
+  (async () => {
+    const existing = await loadState();
+    if (existing != null) { editor.value = existing; log('Restored from storage'); }
+  })();
 
-  // OPTIONAL: Add your Markdown/ABC/LilyPond pipeline here
-  // - For Markdown: import a tiny parser (marked, micromark) and render to a <div>.
-  // - For ABCJS: embed abcjs in /vendor and cache it via sw.js.
-  // - For LilyPond: typically compile server-side or pre-generate assets; for MIDI, route via WebAudio.
+  let debounce;
+  editor.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(async () => {
+      await saveState(editor.value);
+      log('Autosaved');
+    }, 400);
+  });
 
+  saveBtn.addEventListener('click', async () => { await saveState(editor.value); log('Saved'); });
+  loadBtn.addEventListener('click', async () => {
+    const v = await loadState();
+    editor.value = v ?? '';
+    log(v != null ? 'Loaded' : 'Nothing saved yet');
+  });
+  clearBtn.addEventListener('click', async () => { await clearState(); log('Cleared'); });
 </script>
 </body>
 </html>
