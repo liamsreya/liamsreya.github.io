@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Quine PWA</title>
+
+<!-- PWA manifest + theme -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#111111">
+
+<!-- iOS Home-Screen niceties -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">
+
+<style>
+  :root { color-scheme: light dark; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    display: grid; place-items: center; padding: 1rem;
+  }
+  .app {
+    width: min(900px, 100%); min-height: 60vh; border: 1px solid #ccc; border-radius: 12px;
+    padding: 1rem; overflow: auto; background: Canvas; color: CanvasText;
+  }
+  .hint { opacity: .7; font-size: .9rem; margin-top: .5rem; }
+  button { font: inherit; padding: .5rem .8rem; border-radius: 8px; }
+  textarea {
+    width: 100%; height: 30vh; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <h1>Quine PWA</h1>
+    <p>This is your PWA shell. Paste your Markdown/ABC/LilyPond content below. Add your renderer/worker as needed.</p>
+
+    <div class="row">
+      <button id="save">Save to local cache</button>
+      <button id="load">Load from local cache</button>
+      <button id="clear">Clear cache</button>
+    </div>
+
+    <textarea id="editor" placeholder="Type here…"></textarea>
+    <div class="hint">
+      iOS install: in Safari → Share → <b>Add to Home Screen</b>.
+      Try offline: Airplane Mode → launch from the icon → your app still opens.
+    </div>
+    <pre id="log"></pre>
+  </div>
+
+<script>
+  // --- GitHub Pages base detection (works in root or /<repo>/) ---
+  // Useful if you later fetch("./something") from JS; this computes a prefix you can prepend.
+  const pathParts = location.pathname.split("/").filter(Boolean);
+  const isProjectPage = location.hostname.endsWith(".github.io") && pathParts.length >= 1;
+  const BASE = isProjectPage ? ("/" + pathParts[0] + "/") : "/";
+
+  // --- Register Service Worker (HTTPS required; GitHub Pages is HTTPS) ---
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register(BASE + "sw.js")
+        .catch(err => console.warn("SW registration failed:", err));
+    });
+  }
+
+  // --- Minimal "quine" storage taste: keep editor content in Cache Storage as a Response ---
+  const CACHE_NAME = "quine-store-v1";
+  const VIRTUAL_DOC = new Request("quine://content", { method: "GET" });
+
+  async function saveContent() {
+    const cache = await caches.open(CACHE_NAME);
+    const text = document.getElementById("editor").value;
+    await cache.put(VIRTUAL_DOC, new Response(text, { headers: { "Content-Type": "text/plain" }}));
+    log("Saved to cache");
+  }
+
+  async function loadContent() {
+    const cache = await caches.open(CACHE_NAME);
+    const res = await cache.match(VIRTUAL_DOC);
+    if (res) {
+      document.getElementById("editor").value = await res.text();
+      log("Loaded from cache");
+    } else {
+      log("Nothing saved yet.");
+    }
+  }
+
+  async function clearContent() {
+    await caches.delete(CACHE_NAME);
+    log("Cleared cache");
+  }
+
+  function log(msg) {
+    const el = document.getElementById("log");
+    el.textContent = (new Date()).toLocaleTimeString() + " -- " + msg + "\n" + el.textContent;
+  }
+
+  document.getElementById("save").addEventListener("click", saveContent);
+  document.getElementById("load").addEventListener("click", loadContent);
+  document.getElementById("clear").addEventListener("click", clearContent);
+
+  // OPTIONAL: Add your Markdown/ABC/LilyPond pipeline here
+  // - For Markdown: import a tiny parser (marked, micromark) and render to a <div>.
+  // - For ABCJS: embed abcjs in /vendor and cache it via sw.js.
+  // - For LilyPond: typically compile server-side or pre-generate assets; for MIDI, route via WebAudio.
+
+</script>
+</body>
+</html>
